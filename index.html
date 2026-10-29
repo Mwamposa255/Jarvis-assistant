@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JARVIS AI</title>
+<style>
+body {
+  margin: 0;
+  background: #07111f;
+  color: #e5f7ff;
+  font-family: Arial, sans-serif;
+}
+header {
+  text-align: center;
+  padding: 24px 10px;
+  color: #54e5ff;
+  letter-spacing: 4px;
+}
+#orb {
+  width: 100px;
+  height: 100px;
+  margin: 10px auto;
+  border: 3px solid #54e5ff;
+  border-radius: 50%;
+  box-shadow: 0 0 30px #168dbb;
+  display: grid;
+  place-items: center;
+  font-size: 38px;
+}
+#chat {
+  max-width: 600px;
+  margin: auto;
+  padding: 14px;
+}
+#messages {
+  height: 38vh;
+  min-height: 220px;
+  overflow-y: auto;
+  background: #101f32;
+  padding: 12px;
+  border-radius: 14px;
+}
+.msg {
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 10px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.ai { background: #18334a; }
+.user { background: #075066; text-align: right; }
+input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  background: #101f32;
+  color: white;
+  border: 1px solid #54e5ff;
+  border-radius: 10px;
+  font-size: 16px;
+}
+button {
+  padding: 12px;
+  margin: 5px 3px 0 0;
+  border: 1px solid #54e5ff;
+  border-radius: 9px;
+  background: #12354a;
+  color: white;
+  font-size: 15px;
+}
+footer {
+  text-align: center;
+  color: #91a9bb;
+  font-size: 12px;
+  padding: 20px;
+}
+</style>
+</head>
+<body>
+<header>
+  <div id="orb">J</div>
+  <h1>J.A.R.V.I.S.</h1>
+  <p>PERSONAL ASSISTANT</p>
+</header>
+
+<main id="chat">
+  <div id="messages">
+    <div class="msg ai">
+      Hello, sir. JARVIS is online.
+      Your basic assistant is ready.
+      Try saying "What time is it?"
+    </div>
+  </div>
+
+  <input id="input" placeholder="Talk to JARVIS..."
+         autocomplete="off">
+
+  <button onclick="send()">Send</button>
+  <button onclick="listen()">🎙 Speak</button>
+  <button onclick="stopVoice()">Stop voice</button>
+
+  <p>
+    <button onclick="command('what time is it')">Time</button>
+    <button onclick="command('open YouTube')">YouTube</button>
+    <button onclick="command('help')">Help</button>
+  </p>
+  <p id="status">System ready</p>
+</main>
+
+<footer>
+  JARVIS PROJECT • VERSION 1.0
+</footer>
+
+<script>
+const input = document.getElementById("input");
+const messages = document.getElementById("messages");
+const statusText = document.getElementById("status");
+
+function add(text, type) {
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.textContent = text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function speak(text) {
+  if (!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const voice = new SpeechSynthesisUtterance(text);
+  voice.lang = "en-US";
+  voice.rate = 0.9;
+  voice.pitch = 0.8;
+  speechSynthesis.speak(voice);
+}
+
+function command(text) {
+  input.value = text;
+  send();
+}
+
+function send() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  add(text, "user");
+  input.value = "";
+  const s = text.toLowerCase();
+  let reply;
+
+  if (s.includes("time")) {
+    reply = "The current time is " +
+      new Date().toLocaleTimeString();
+  } else if (s.includes("date")) {
+    reply = "Today is " +
+      new Date().toLocaleDateString();
+  } else if (s.includes("open youtube")) {
+    reply = "Opening YouTube.";
+    window.open("https://youtube.com", "_blank");
+  } else if (s.includes("open google")) {
+    reply = "Opening Google.";
+    window.open("https://google.com", "_blank");
+  } else if (s.includes("hello") || s.includes("hi jarvis")) {
+    reply = "Hello, sir. How may I help you?";
+  } else if (s.includes("your name")) {
+    reply = "I am JARVIS, your personal assistant.";
+  } else if (s.includes("help")) {
+    reply = "I can tell you the time and date, greet you, and open YouTube or Google. AI chat and advanced phone controls will be added next.";
+  } else {
+    reply = "I received your message. My AI brain is not connected yet. That is our next upgrade.";
+  }
+
+  add(reply, "ai");
+  speak(reply);
+}
+
+function listen() {
+  const Speech = window.SpeechRecognition ||
+                 window.webkitSpeechRecognition;
+
+  if (!Speech) {
+    statusText.textContent =
+      "Voice recognition unavailable. Try Chrome.";
+    return;
+  }
+
+  const recognition = new Speech();
+  recognition.lang = "en-US";
+  recognition.onstart = () => {
+    statusText.textContent = "Listening...";
+  };
+  recognition.onresult = (event) => {
+    input.value = event.results[0][0].transcript;
+    statusText.textContent = "Processing...";
+    send();
+  };
+  recognition.onerror = () => {
+    statusText.textContent =
+      "Check microphone permission and internet.";
+  };
+  recognition.onend = () => {
+    statusText.textContent = "System ready";
+  };
+  recognition.start();
+}
+
+function stopVoice() {
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+}
+
+input.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") send();
+});
+</script>
+</body>
+</html>
