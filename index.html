@@ -184,15 +184,15 @@ async function send() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || "AI request failed");
-      }
+    if (!response.ok) {
+  throw new Error(data.error + " | " + (data.details || "No details"));
+    }  
 
       reply = data.reply || "I could not generate a response.";
 
     } catch (error) {
-      reply = "Sorry, I cannot reach my AI brain right now. Please try again.";
-    }
+  reply = "JARVIS ERROR: " + error.message;
+}
   }
 
   add(reply, "ai");
